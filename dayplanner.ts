@@ -14,6 +14,7 @@ export interface Activity {
  export interface Assignment {
     activity: Activity;
     startTime: number; // in half-hour slots from midnight
+    importanceWeight: number; // 0 -- not important <> 5 -- very important
 }
 
 export class DayPlanner {
@@ -32,22 +33,51 @@ export class DayPlanner {
     removeActivity(activity: Activity): void {
         // Remove assignments for this activity
         this.assignments = this.assignments.filter(assignment => assignment.activity !== activity);
-        
+
         // Remove the activity
         this.activities = this.activities.filter(a => a !== activity);
     }
 
-    assignActivity(activity: Activity, startTime: number): void {
+    async assignActivity(activity: Activity, startTime: number, importanceWeight?: number, llm?: GeminiLLM): Promise<void> {
         // Remove any existing assignment for this activity
         this.unassignActivity(activity);
-        
+
+        let finalImportance: number;
+        if (importanceWeight !== undefined) {
+            finalImportance = importanceWeight;
+        } else if (llm) {
+            // Infer importance using AI
+            finalImportance = await this.inferImportanceWithAI(activity, llm);
+        } else {
+            // Default if no AI provided
+            finalImportance = 3;
+        }
+
         // Create new assignment
         const assignment: Assignment = {
             activity,
-            startTime
+            startTime,
+            importanceWeight: finalImportance
         };
-        
+
         this.assignments.push(assignment);
+    }
+
+    /**
+     * Use GeminiLLM to infer importance weight for an activity
+     */
+    private async inferImportanceWithAI(activity: Activity, llm: GeminiLLM): Promise<number> {
+        const prompt = `Given the following activity, rate its importance on a scale from 0 (not important) to 5 (very important):\n\nTitle: ${activity.title}\nDuration: ${activity.duration * 0.5} hours\n\nRespond with only the number.`;
+        const response = await llm.executeLLM(prompt);
+        const match = response.match(/\d+/);
+        if (match) {
+            const value = parseInt(match[0], 10);
+            if (value >= 0 && value <= 5) {
+                return value;
+            }
+        }
+        // Fallback if AI response is invalid
+        return 3;
     }
 
     unassignActivity(activity: Activity): void {
@@ -57,7 +87,7 @@ export class DayPlanner {
     async assignActivities(llm: GeminiLLM): Promise<void> {
         try {
             console.log('🤖 Requesting schedule assignments from Gemini AI...');
-            
+
             const unassignedActivities = this.activities.filter(a => !this.isAssigned(a));
 
             if (unassignedActivities.length === 0) {
@@ -69,16 +99,16 @@ export class DayPlanner {
 
             const prompt = this.createAssignmentPrompt(unassignedActivities, existingAssignments);
             const text = await llm.executeLLM(prompt);
-            
+
             console.log('✅ Received response from Gemini AI!');
             console.log('\n🤖 RAW GEMINI RESPONSE');
             console.log('======================');
             console.log(text);
             console.log('======================\n');
-            
+
             // Parse and apply the assignments
             this.parseAndApplyAssignments(text, unassignedActivities);
-            
+
         } catch (error) {
             console.error('❌ Error calling Gemini API:', (error as Error).message);
             throw error;
@@ -107,7 +137,8 @@ export class DayPlanner {
             "3. Avoid conflicts - don't overlap activities",
             "4. Consider the duration of each activity when scheduling",
             "5. Use appropriate time slots based on the preferences above",
-            "6. Never assign an activity to more than one time slot"
+            "6. Never assign an activity to more than one time slot",
+            "7. Show only high importance activities"
         ];
 
         if (existingAssignments.length > 0) {
@@ -131,6 +162,11 @@ TIME SYSTEM:
 - There are 48 slots total (24 hours x 2)
 - Valid slots are 0-47 (midnight to 11:30 PM)
 
+IMPORTANCE SYSTEM:
+- Importance is weight 0 - 5
+- 0: not important at all
+- 5: very important
+
 ${existingAssignmentsSection}ACTIVITIES TO SCHEDULE (ONLY THESE - DO NOT ADD OTHERS):
 ${this.activitiesToString(activities)}
 
@@ -142,7 +178,8 @@ Return your response as a JSON object with this exact structure:
   "assignments": [
     {
       "title": "exact activity title from the list above",
-      "startTime": valid_slot_number_0_to_47
+      "startTime": valid_slot_number_0_to_47,
+      "importanceWeight": valid_importance_0_to_5
     }
   ]
 }
@@ -163,7 +200,7 @@ Return ONLY the JSON object, no additional text.`;
             }
 
             const response = JSON.parse(jsonMatch[0]);
-            
+
             if (!response.assignments || !Array.isArray(response.assignments)) {
                 throw new Error('Invalid response format');
             }
@@ -256,7 +293,7 @@ Return ONLY the JSON object, no additional text.`;
                 this.assignActivity(assignment.activity, assignment.startTime);
                 console.log(`✅ Assigned "${assignment.activity.title}" to ${this.formatTimeSlot(assignment.startTime)}`);
             }
-            
+
         } catch (error) {
             console.error('❌ Error parsing LLM response:', (error as Error).message);
             console.log('Response was:', responseText);
@@ -269,17 +306,17 @@ Return ONLY the JSON object, no additional text.`;
      */
     getSchedule(): { [timeSlot: number]: Activity[] } {
         const schedule: { [timeSlot: number]: Activity[] } = {};
-        
+
         // Initialize all possible time slots (48 half-hour slots in a day)
         for (let i = 0; i < 48; i++) {
             schedule[i] = [];
         }
-        
+
         // Walk through assignments and place activities in their time slots
         for (const assignment of this.assignments) {
             const startTime = assignment.startTime;
             const duration = assignment.activity.duration;
-            
+
             // Place the activity in all its occupied time slots
             for (let i = 0; i < duration; i++) {
                 const slot = startTime + i;
@@ -288,7 +325,7 @@ Return ONLY the JSON object, no additional text.`;
                 }
             }
         }
-        
+
         return schedule;
     }
 
@@ -302,7 +339,7 @@ Return ONLY the JSON object, no additional text.`;
         const minutes = (timeSlot % 2) * 30;
         const period = hours >= 12 ? 'PM' : 'AM';
         const displayHours = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
-        
+
         return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
     }
 
@@ -318,6 +355,7 @@ Return ONLY the JSON object, no additional text.`;
             .map(assignment => {
                 const time = this.formatTimeSlot(assignment.startTime);
                 const durationStr = assignment.activity.duration === 1 ? '30 minutes' : `${assignment.activity.duration * 0.5} hours`;
+                const importanceStr = `${assignment.importanceWeight} importance level`
                 return `- ${assignment.activity.title} at ${time} (${durationStr})`;
             })
             .join('\n');
@@ -328,23 +366,23 @@ Return ONLY the JSON object, no additional text.`;
      */
     displaySchedule(): void {
         const schedule = this.getSchedule();
-        
+
         console.log('\n📅 Daily Schedule');
         console.log('==================');
-        
+
         let hasActivities = false;
-        
+
         for (let slot = 0; slot < 48; slot++) {
             const activities = schedule[slot];
             if (activities.length > 0) {
                 hasActivities = true;
                 const timeStr = this.formatTimeSlot(slot);
-                
+
                 // Only show the start of each activity (not every half-hour)
-                const isActivityStart = activities.some(activity => 
+                const isActivityStart = activities.some(activity =>
                     this.assignments.find(a => a.activity === activity)?.startTime === slot
                 );
-                
+
                 if (isActivityStart) {
                     const uniqueActivities = [...new Set(activities)];
                     for (const activity of uniqueActivities) {
@@ -354,11 +392,11 @@ Return ONLY the JSON object, no additional text.`;
                 }
             }
         }
-        
+
         if (!hasActivities) {
             console.log('No activities scheduled yet.');
         }
-        
+
         console.log('\n📋 Unassigned Activities');
         console.log('========================');
         const unassigned = this.activities.filter(a => !this.isAssigned(a));
