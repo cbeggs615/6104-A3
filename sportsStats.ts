@@ -179,7 +179,6 @@ Stats: ${JSON.stringify(stats, null, 2)}
 
 
     /**
-     * PRIVATE VALIDATOR
      * Ensures the AI summary is concise, references given stats, and avoids hallucinated stats
      */
     private validateSummary(summary: string, stats: Record<string, number>, keyStats: string[]): void {

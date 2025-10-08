@@ -74,6 +74,8 @@ a set of TeamStats with ... <br>
 a name String <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 a Sport<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+a stats Record<Stat, Data>  // stored locally in this prototype for testing <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 a set of Sports with ... <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -120,6 +122,13 @@ removeKeyStat (sportName: String, stat: Stat): <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 **effects** removes stat from sportName's KeyStats<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+updateStat (teamname: String, sport: Sport, stat: Stat, value: Data): <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**requires** TeamStats for this teamname and sport exist and stat in sport’s KeyStats
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**effects** updates the value of that stat for the specified team
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
 fetchTeamStats (teamname: String, sport: Sport): (keyStatsData: Map<Stat, Data>)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 **requires** TeamStat for this teamname and sport exists<br>
@@ -131,7 +140,10 @@ fetchTeamStats (teamname: String, sport: Sport): (keyStatsData: Map<Stat, Data>)
     **requires** TeamStats for this teamname and sport exists<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     **effects** calls an LLM using the team’s key stats to produce a textual performance summary
-
+> notes: notes
+    In this prototype, stats are stored locally in the TeamStats state and updated manually via `updateStat`.
+    In a full implementation, these values would be gathered dynamically from each sport’s external Source (e.g., an API or live database). This concept extends the original SportsStats design by adding an AI-based analysis action that generates readable summaries
+    of a team’s performance based on their key stats.
 ## User Journey
 ![AI Functionality](IMG_F4755705F23E-1.jpeg)
 
@@ -175,7 +187,7 @@ Mention standout metrics or areas to improve.
 2. Multiple teams added each with own stats
   - Scenario: Two sports (Baseball and Basketball) were added. Baseball included two teams, while Basketball included one.
   - Result: The LLM successfully generated distinct summaries for each team without confusing stats between sports. However, similar to the single-team case, it produced list-style summaries (per-stat explanations) instead of a cohesive narrative.
-  - Action to take: Clarify in the prompt that the model should produce a unified, paragraph-style summary integrating all key stats, rather than a stat-by-stat breakdown followed by a conclusion. Try to encourage as concise as possible.
+  - Action to take: Clarify in the prompt that the model should produce a unified, paragraph-style summary integrating all key stats, rather than a stat-by-stat breakdown followed by a conclusion. Try to encourage LLM to be as concise as possible.
   - New Prompt:
   ```
   You are a professional sports analyst.
