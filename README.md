@@ -226,4 +226,4 @@ Even with a clearly defined prompt, an LLM can generate summaries that are logic
 
 3. Hallucinated Data or Values – The LLM can occasionally invent statistics not provided in the input (e.g., adding “RBI 120” when RBI was never supplied). A refined validator searches for uppercase tokens (potential stat abbreviations) that include numeric values but are not part of the input list, flagging them as hallucinations only when a number appears near the unrecognized stat.
 
-These checks collectively ensure that the AI-generated summaries remain concise, relevant, and grounded in the data actually provided to the model. They are located in [`validateSummary`](./sportsStats.ts#184-L213).
+These checks collectively ensure that the AI-generated summaries remain concise, relevant, and grounded in the data actually provided to the model. They are located in [`validateSummary`](./sportsStats.ts#L184-L213).
