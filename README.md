@@ -1,182 +1,229 @@
-# DayPlanner 
-A simple day planner. This implementation focuses on the core concept of organizing activities for a single day with both manual and AI-assisted scheduling.
+# Assignment 3
+## Augment the design of a concept
+### Original concept
+**concept** SportsStats[Source, Stat, Data] <br>
+**purpose** store team statistics in a structured way, where each sport defines which stats are tracked and which are considered key <br>
+**principle** each sport defines a set of stats relevant to it (with some marked as key); teams belonging to that sport inherit those stat types and maintain their own current values<br>
+**state** <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+a set of TeamStats with ... <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+a name String <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+a Sport<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+a set of Sports with ... <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+a name String <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+a Source<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+a KeyStats set of Stats<br>
+**actions** <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+addTeam (teamname: String, sport: Sport): (teamStats: TeamStat)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**requires** no TeamStats for this teamname with this sport already exists <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**effects** creates a new TeamStats for this teamname for sport<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+removeTeam (teamname: String, sport: Sport): (teamStats: TeamStat)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**requires** TeamStats for this teamname with this sport exists <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**effects** removes TeamStats for this teamname for sport<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+addSport (sportName: String, source: Source, default: Set of Stats): (sport: Sport)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**requires** no Sport with this name exists <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**effects** creates a new Sport with this source with KeyStats set as default<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+deleteSport (sportName: String): (sport: Sport)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**requires** Sport with this name exists and no teams associated with the sport exists<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**effects** removes sportname from state<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+addKeyStat (sportName: String, stat: Stat):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**requires** Sport with this name exists and stat is not already in its KeyStats<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**effects** adds stat to sportName's KeyStats<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+removeKeyStat (sportName: String, stat: Stat): <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**requires** Sport with this name exists and stat is in its KeyStats<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**effects** removes stat from sportName's KeyStats<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+fetchTeamStats (teamname: String, sport: Sport): (keyStatsData: Map<Stat, Data>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**requires** TeamStat for this teamname and sport exists<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**effects** for each KeyStat in sport's KeyStats, fetches Data for this specific team from Sport's Source<br>
 
-## Concept: DayPlanner
+### Augmented Concept
+**concept** AISportsStats[Source, Stat, Data] <br>
+**purpose** store team statistics in a structured way, where each sport defines which stats are tracked and which are considered key <br>
+**principle** each sport defines a set of stats relevant to it (with some marked as key); teams belonging to that sport inherit those stat types and maintain their own current values; users can view a team’s current stats and use an LLM to generate an explanatory summary<br>
+**state** <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+a set of TeamStats with ... <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+a name String <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+a Sport<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+a set of Sports with ... <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+a name String <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+a Source<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+a KeyStats set of Stats<br>
+**actions** <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+addTeam (teamname: String, sport: Sport): (teamStats: TeamStat)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**requires** no TeamStats for this teamname with this sport already exists <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**effects** creates a new TeamStats for this teamname for sport<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+removeTeam (teamname: String, sport: Sport): (teamStats: TeamStat)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**requires** TeamStats for this teamname with this sport exists <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**effects** removes TeamStats for this teamname for sport<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+addSport (sportName: String, source: Source, default: Set of Stats): (sport: Sport)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**requires** no Sport with this name exists <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**effects** creates a new Sport with this source with KeyStats set as default<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+deleteSport (sportName: String): (sport: Sport)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**requires** Sport with this name exists and no teams associated with the sport exists<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**effects** removes sportname from state<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+addKeyStat (sportName: String, stat: Stat):<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**requires** Sport with this name exists and stat is not already in its KeyStats<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**effects** adds stat to sportName's KeyStats<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+removeKeyStat (sportName: String, stat: Stat): <br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**requires** Sport with this name exists and stat is in its KeyStats<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**effects** removes stat from sportName's KeyStats<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+fetchTeamStats (teamname: String, sport: Sport): (keyStatsData: Map<Stat, Data>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**requires** TeamStat for this teamname and sport exists<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+**effects** for each KeyStat in sport's KeyStats, fetches Data for this specific team from Sport's Source<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  analyzeTeamPerformance (teamname: String, sport: Sport): (summary: String)<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    **requires** TeamStats for this teamname and sport exists<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    **effects** calls an LLM using the team’s key stats to produce a textual performance summary
 
-**Purpose**: Help you organize activities for a single day  
-**Principle**: You can add activities one at a time, assign them to times, and then observe the completed schedule
+## User Journey
+![AI Functionality](IMG_F4755705F23E-1.jpeg)
 
-### Core State
-- **Activities**: Set of activities with title, duration, and optional startTime
-- **Assignments**: Set of activity-to-time assignments
-- **Time System**: All times in half-hour slots starting at midnight (0 = 12:00 AM, 13 = 6:30 AM)
+The user opens the StatsShot page for one of their favorited teams, the Philadelphia Phillies. While viewing the key stats, they notice the team's average OPS is listed as .844 along with other key stats, but they aren’t sure what these numbers means. They click the “Generate AI Summary” button beside the stats display, and an AI-generated explanation appears, interpreting the numbers and summarizing how the team is performing this season. After reading the summary, the user can provide quick feedback on whether the explanation seems accurate.
 
-### Core Actions
-- `addActivity(title: string, duration: number): Activity`
-- `removeActivity(activity: Activity)`
-- `assignActivity(activity: Activity, startTime: number)`
-- `unassignActivity(activity: Activity)`
-- `requestAssignmentsFromLLM()` - AI-assisted scheduling with hardwired preferences
+## Prompt Experimentation
+Original Prompt:
+> You are a sports analyst AI. <br>
+  Explain what the following stats suggest about the performance of the `{teamName}` in `{sport.name}`. <br>
+  Use clear, conversational language suitable for casual fans. <br>
+  Team: `{teamName}` <br>
+  Sport: `{sport.name}` <br>
+  Stats: `{JSON.stringify(stats, null, 2)}` <br>
+  Give a short summary (3–5 sentences). Mention standout metrics or areas to improve.
 
-## Prerequisites
+### AI Test Cases/Experiments
 
-- **Node.js** (version 14 or higher)
-- **TypeScript** (will be installed automatically)
-- **Google Gemini API Key** (free at [Google AI Studio](https://makersuite.google.com/app/apikey))
+For each, appropriate teams/sports added, stats are updated, then calls for summary for a team using this information.
+1. One team with stats: <br>
+  - Scenario: One team (Philadelphia Phillies) was added under Baseball with key stats.
+  - Result: The generated summary was informative but not within the intended 3–5 sentence range. Instead, the LLM listed each stat individually and then added a short concluding statement.
+  - Action to take: Revise the prompt to clearly specify that the entire summary should be limited to 3–5 sentences/ 45-200 words and focus on overall team performance, rather than describing each stat separately.
+  - New Prompt:
+   ```
+You are a professional sports analyst.
+Write a single cohesive summary of the team’s performance in 3–5 sentences total (45-200 words).
 
-## Quick Setup
+Integrate all provided statistics into one unified paragraph rather than listing them individually.
+Focus on the overall narrative of how the team is performing based on these stats. Focus on key statistics.
 
-### 0. Clone the repo locally and navigate to it
-```cd intro-gemini-schedule```
+Explain what the following stats suggest about the performance of the ${teamName} in ${sport.name}.
+Use clear, conversational language suitable for casual fans.
 
-### 1. Install Dependencies
+Team: ${teamName}
+Sport: ${sport.name}
+Stats: ${JSON.stringify(stats, null, 2)}
 
-```bash
-npm install
+Mention standout metrics or areas to improve.
 ```
+- Results: More concise responses and summary for this test. Still a bit wordy though.
+2. Multiple teams added each with own stats
+  - Scenario: Two sports (Baseball and Basketball) were added. Baseball included two teams, while Basketball included one.
+  - Result: The LLM successfully generated distinct summaries for each team without confusing stats between sports. However, similar to the single-team case, it produced list-style summaries (per-stat explanations) instead of a cohesive narrative.
+  - Action to take: Clarify in the prompt that the model should produce a unified, paragraph-style summary integrating all key stats, rather than a stat-by-stat breakdown followed by a conclusion. Try to encourage as concise as possible.
+  - New Prompt:
+  ```
+  You are a professional sports analyst.
+Write a single cohesive summary of the team’s performance in 3–5 sentences total (45-200 words).
 
-### 2. Add Your API Key
+Integrate all provided statistics into one unified paragraph rather than listing them individually.
+Focus on the overall narrative of how the team is performing based on these stats. Focus on key statistics.
 
-**Why use a template?** The `config.json` file contains your private API key and should never be committed to version control. The template approach lets you:
-- Keep the template file in git (safe to share)
-- Create your own `config.json` locally (keeps your API key private)
-- Easily set up the project on any machine
+Explain what the following stats suggest about the performance of the ${teamName} in ${sport.name}.
 
-**Step 1:** Copy the template file:
-```bash
-cp config.json.template config.json
-```
+Use clear, conversational language suitable for casual fans. Be as concise as possible while still mention standout metrics or areas to improve along with overall narrative.
 
-**Step 2:** Edit `config.json` and add your API key:
-```json
-{
-  "apiKey": "YOUR_GEMINI_API_KEY_HERE"
-}
-```
+Team: ${teamName}
+Sport: ${sport.name}
+Stats: ${JSON.stringify(stats, null, 2)}
+  ```
+  - Result: Output was more concise but omitted explicit references to stat abbreviations (e.g., “points per game” instead of “PPG”), which could confuse fans familiar with standard metrics or those who are less familiar with statistics.
+3. Conflicting/Inconsistent statistics:
+  - Scenario: The Phillies were given an impossible stat line (OBP = .510, OPS = .480), which violates basic baseball logic since OPS must always exceed OBP (OPS = OBP + SLG and SLG >= 0).
+  - Result: The model correctly recognized that one stat appeared strong and the other weak but did not explicitly flag the inconsistency or indicate that the data was unrealistic.
+  - Action to Take: Revise the prompt to instruct the LLM to identify and explicitly state any inconsistencies or logical errors in the provided data before summarizing performance. Also, revise from previous prompt that result uses same language as stats (include the actual abbreviations).
+  - New Prompt:
+  ```
+  You are a professional sports analyst.
+Write a single cohesive summary of the team’s performance in 3–5 sentences total (45-200 words).
 
-**To get your API key:**
-1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Sign in with your Google account
-3. Click "Create API Key"
-4. Copy the key and paste it into `config.json` (replacing `YOUR_GEMINI_API_KEY_HERE`)
+Before writing your 3–5 sentence summary, check if any values are inconsistent or impossible. If such inconsistencies exist, explicitly state that the data may be inaccurate before giving your summary.
 
-### 3. Run the Application
+Integrate all provided statistics into one unified paragraph rather than listing them individually.
+Focus on the overall narrative of how the team is performing based on these stats. Focus on key statistics.
 
-**Run all test cases:**
-```bash
-npm start
-```
+Explain what the following stats suggest about the performance of the ${teamName} in ${sport.name}.
 
-**Run specific test cases:**
-```bash
-npm run manual    # Manual scheduling only
-npm run llm       # LLM-assisted scheduling only
-npm run mixed     # Mixed manual + LLM scheduling
-```
+Use clear, conversational language suitable for casual fans. Be as concise as possible while still mention standout metrics or areas to improve along with overall narrative. If writing out statistic names (ex batting avg instead of AVG), say the abbreivation as well.
 
-## File Structure
+Team: ${teamName}
+Sport: ${sport.name}
+Stats: ${JSON.stringify(stats, null, 2)}
+  ```
+  - Result: The LLM produced a concise summary that immediately called out the inconsistency in the data and included correct abbreviations for statistics, improving both clarity and realism.
 
-```
-dayplanner/
-├── package.json              # Dependencies and scripts
-├── tsconfig.json             # TypeScript configuration
-├── config.json               # Your Gemini API key
-├── dayplanner-types.ts       # Core type definitions
-├── dayplanner.ts             # DayPlanner class implementation
-├── dayplanner-llm.ts         # LLM integration
-├── dayplanner-tests.ts       # Test cases and examples
-├── dist/                     # Compiled JavaScript output
-└── README.md                 # This file
-```
+## Validators
+Even with a clearly defined prompt, an LLM can generate summaries that are logically inconsistent or violate design constraints. Three plausible issues were identified and addressed through validators in the AISportsStats class.
 
-## Test Cases
+1. Length Deviation – The LLM may produce overly short or excessively long summaries that fall outside the intended 3–5 sentence (≈45–200 word) range. The validator checks the word count and throws an error if the summary is too brief to be meaningful or too long to remain focused.
 
-The application includes three comprehensive test cases:
+2. No Key Statistics Mentioned – The LLM might omit key statistics entirely or reference unrelated ones. To address this, a validator ensures that at least one key stat from the input (e.g., OPS, AVG, ERA) is explicitly mentioned.
 
-### 1. Manual Scheduling
-Demonstrates adding activities and manually assigning them to time slots:
+3. Hallucinated Data or Values – The LLM can occasionally invent statistics not provided in the input (e.g., adding “RBI 120” when RBI was never supplied). A refined validator searches for uppercase tokens (potential stat abbreviations) that include numeric values but are not part of the input list, flagging them as hallucinations only when a number appears near the unrecognized stat.
 
-```typescript
-const planner = new DayPlanner();
-const breakfast = planner.addActivity('Breakfast', 1); // 30 minutes
-planner.assignActivity(breakfast, 14); // 7:00 AM
-```
-
-### 2. LLM-Assisted Scheduling
-Shows AI-powered scheduling with hardwired preferences:
-
-```typescript
-const planner = new DayPlanner();
-planner.addActivity('Morning Jog', 2);
-planner.addActivity('Math Homework', 4);
-await llm.requestAssignmentsFromLLM(planner);
-```
-
-### 3. Mixed Scheduling
-Combines manual assignments with AI assistance for remaining activities.
-
-## Sample Output
-
-```
-📅 Daily Schedule
-==================
-7:00 AM - Breakfast (30 min)
-8:00 AM - Morning Workout (1 hours)
-10:00 AM - Study Session (1.5 hours)
-1:00 PM - Lunch (30 min)
-3:00 PM - Team Meeting (1 hours)
-7:00 PM - Dinner (30 min)
-9:00 PM - Evening Reading (1 hours)
-
-📋 Unassigned Activities
-========================
-All activities are assigned!
-```
-
-## Key Features
-
-- **Simple State Management**: Activities and assignments stored in memory
-- **Flexible Time System**: Half-hour slots from midnight (0-47)
-- **Query-Based Display**: Schedule generated on-demand, not stored sorted
-- **AI Integration**: Hardwired preferences in LLM prompt (no external hints)
-- **Conflict Detection**: Prevents overlapping activities
-- **Clean Architecture**: First principles implementation with no legacy code
-
-## LLM Preferences (Hardwired)
-
-The AI uses these built-in preferences:
-- Exercise activities: Morning (6:00 AM - 10:00 AM)
-- Study/Classes: Focused hours (9:00 AM - 5:00 PM)
-- Meals: Regular intervals (breakfast 7-9 AM, lunch 12-1 PM, dinner 6-8 PM)
-- Social/Relaxation: Evenings (6:00 PM - 10:00 PM)
-- Avoid: Demanding activities after 10:00 PM
-
-## Troubleshooting
-
-### "Could not load config.json"
-- Ensure `config.json` exists with your API key
-- Check JSON format is correct
-
-### "Error calling Gemini API"
-- Verify API key is correct
-- Check internet connection
-- Ensure API access is enabled in Google AI Studio
-
-### Build Issues
-- Use `npm run build` to compile TypeScript
-- Check that all dependencies are installed with `npm install`
-
-## Next Steps
-
-Try extending the DayPlanner:
-- Add weekly scheduling
-- Implement activity categories
-- Add location information
-- Create a web interface
-- Add conflict resolution strategies
-- Implement recurring activities
-
-## Resources
-
-- [Google Generative AI Documentation](https://ai.google.dev/docs)
-- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
+These checks collectively ensure that the AI-generated summaries remain concise, relevant, and grounded in the data actually provided to the model. They are located in `validateSummary`.
