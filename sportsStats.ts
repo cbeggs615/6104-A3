@@ -1,5 +1,5 @@
 /**
- * DayPlanner Concept - AI Augmented Version
+ * SportsStats Concept - AI Augmented Version
  */
 
 import { GeminiLLM } from './gemini-llm';

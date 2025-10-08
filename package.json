@@ -9,9 +9,9 @@
     "dev": "ts-node --transpile-only sportsStats-tests.ts",
     "test": "npm run build && node dist/sportsStats-tests.js",
     "manual": "npm run build && node -e \"require('./dist/sportsStats-tests.js').testManualStats()\"",
-    "llm": "npm run build && node -e \"require('./dist/dayplanner-tests.js').testLLMAnalysis()\"",
-    "multi-team": "npm run build && node -e \"require('./dist/dayplanner-tests.js').testMultiTeamAnalysis()\"",
-    "conflict-stats": "npm run build && node -e \"require('./dist/dayplanner-tests.js').testConflictingStats()\""
+    "llm": "npm run build && node -e \"require('./dist/sportsStats-tests.js').testLLMAnalysis()\"",
+    "multi-team": "npm run build && node -e \"require('./dist/sportsStats-tests.js').testMultiTeamAnalysis()\"",
+    "conflict-stats": "npm run build && node -e \"require('./dist/sportsStats-tests.js').testConflictingStats()\""
   },
   "keywords": ["gemini", "ai", "schedule", "student", "demo", "typescript"],
   "author": "Student Demo",

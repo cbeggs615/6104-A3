@@ -1,4 +1,15 @@
 # Assignment 3
+## How to run
+**Run all test cases** <br>
+```
+npm start
+````
+**Run specific test cases** <br>
+```
+npm run llm  # run only test case for stats for one team
+npm run multi-team # run only multi-sport multi-team test
+npm run conflict-stats # run only conflicting stats test
+````
 ## Augment the design of a concept
 ### Original concept
 **concept** SportsStats[Source, Stat, Data] <br>
