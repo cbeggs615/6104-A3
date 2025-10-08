@@ -162,7 +162,7 @@ Original Prompt:
 ### AI Test Cases/Experiments
 
 For each, appropriate teams/sports added, stats are updated, then calls for summary for a team using this information.
-1. One team with stats: <br>
+1. One team with stats: See [`testLLMAnalysis`](./sportsStats-tests.ts#L57-L91)<br>
   - Scenario: One team (Philadelphia Phillies) was added under Baseball with key stats.
   - Result: The generated summary was informative but not within the intended 3–5 sentence range. Instead, the LLM listed each stat individually and then added a short concluding statement.
   - Action to take: Revise the prompt to clearly specify that the entire summary should be limited to 3–5 sentences/ 45-200 words and focus on overall team performance, rather than describing each stat separately.
@@ -184,7 +184,7 @@ Stats: ${JSON.stringify(stats, null, 2)}
 Mention standout metrics or areas to improve.
 ```
 - Results: More concise responses and summary for this test. Still a bit wordy though.
-2. Multiple teams added each with own stats
+2. Multiple teams added each with own stats: See [`testMultiTeamAnalysis`](./sportsStats-tests.ts#L97-L144)
   - Scenario: Two sports (Baseball and Basketball) were added. Baseball included two teams, while Basketball included one.
   - Result: The LLM successfully generated distinct summaries for each team without confusing stats between sports. However, similar to the single-team case, it produced list-style summaries (per-stat explanations) instead of a cohesive narrative.
   - Action to take: Clarify in the prompt that the model should produce a unified, paragraph-style summary integrating all key stats, rather than a stat-by-stat breakdown followed by a conclusion. Try to encourage LLM to be as concise as possible.
@@ -205,7 +205,7 @@ Sport: ${sport.name}
 Stats: ${JSON.stringify(stats, null, 2)}
   ```
   - Result: Output was more concise but omitted explicit references to stat abbreviations (e.g., “points per game” instead of “PPG”), which could confuse fans familiar with standard metrics or those who are less familiar with statistics.
-3. Conflicting/Inconsistent statistics:
+3. Conflicting/Inconsistent statistics: See [`testConflictingStats`](./sportsStats-tests.ts#L150-L182)
   - Scenario: The Phillies were given an impossible stat line (OBP = .510, OPS = .480), which violates basic baseball logic since OPS must always exceed OBP (OPS = OBP + SLG and SLG >= 0).
   - Result: The model correctly recognized that one stat appeared strong and the other weak but did not explicitly flag the inconsistency or indicate that the data was unrealistic.
   - Action to Take: Revise the prompt to instruct the LLM to identify and explicitly state any inconsistencies or logical errors in the provided data before summarizing performance. Also, revise from previous prompt that result uses same language as stats (include the actual abbreviations).
@@ -238,4 +238,4 @@ Even with a clearly defined prompt, an LLM can generate summaries that are logic
 
 3. Hallucinated Data or Values – The LLM can occasionally invent statistics not provided in the input (e.g., adding “RBI 120” when RBI was never supplied). A refined validator searches for uppercase tokens (potential stat abbreviations) that include numeric values but are not part of the input list, flagging them as hallucinations only when a number appears near the unrecognized stat.
 
-These checks collectively ensure that the AI-generated summaries remain concise, relevant, and grounded in the data actually provided to the model. They are located in `validateSummary`.
+These checks collectively ensure that the AI-generated summaries remain concise, relevant, and grounded in the data actually provided to the model. They are located in [`validateSummary`](./sportsStats.ts#L184-L213).
